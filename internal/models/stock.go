@@ -1,13 +1,12 @@
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Stock struct {
-	ID        int64
-	Name      string
-	Code      string
-	Quantity  int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt time.Time
+	gorm.Model
+	Name     string
+	Code     string
+	Quantity int64
 }
