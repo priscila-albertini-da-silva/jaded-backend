@@ -1,0 +1,87 @@
+name: CI Pipeline to Jaded Backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.20
+
+    - name: Install dependencies
+      run: go mod tidy
+
+    - name: Build Go project
+      run: go build -v ./...
+
+    - name: Install SonarScanner CLI
+      run: |
+        curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+        unzip sonar-scanner-cli.zip
+        export PATH="$PATH:$(pwd)/sonar-scanner-4.8.0.2856-linux/bin"
+
+    - name: Run Go tests with coverage
+      run: |
+        go test -coverprofile=coverage.out ./...
+
+    - name: Run integration tests
+      run: npm run test:integration
+
+    - name: Run Go Linter
+      run: golangci-lint run
+
+    - name: Run SonarQube analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=priscila-albertini-silva_jaded-backend \
+          -Dsonar.organization=priscila-albertini-silva \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+
+          name: SonarQube Analysis
+
+    - name: Run Dependabot security scan
+      uses: dependabot/dependabot-core@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+    # - name: Login to DockerHub
+    #   uses: docker/login-action@v2
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # - name: Build and push Docker image
+    #   run: |
+    #     docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.sha }} .
+    #     docker push ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.sha }}
+    
+    # - name: Send Email Notification
+    #   uses: dawidd6/action-send-mail@v3
+    #   with:
+    #     server_address: smtp.gmail.com
+    #     server_port: 465
+    #     username: ${{ secrets.MAIL_USERNAME }}
+    #     password: ${{ secrets.MAIL_PASSWORD }}
+    #     subject: Build Status
+    #     body: The build has completed.
+    #     to: your-email@example.com
+    #     from: GitHub Actions <github-actions@example.com>
