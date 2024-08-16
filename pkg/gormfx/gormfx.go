@@ -2,6 +2,7 @@ package gormfx
 
 import (
 	"github.com/priscila-albertini-silva/jaded-backend/config"
+	"github.com/priscila-albertini-silva/jaded-backend/internal/models"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
@@ -26,7 +27,9 @@ func initDatabaseConnection() (*gorm.DB, error) {
 	log.Infof("Database connected to: %+v", gormDB)
 
 	gormDB.AutoMigrate(
-	// &entities.User{}, &entities.Product{}, &entities.Order{}
+		&models.Stock{},
+		// &models.Dividend{},
+		// &models.Order{},
 	)
 
 	return gormDB, err

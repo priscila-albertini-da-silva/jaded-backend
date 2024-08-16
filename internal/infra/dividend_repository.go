@@ -2,7 +2,6 @@ package infra
 
 import (
 	"github.com/priscila-albertini-silva/jaded-backend/internal/models"
-	"github.com/priscila-albertini-silva/jaded-backend/internal/schemas"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -13,28 +12,6 @@ type DividendRepository struct{ db *gorm.DB }
 
 func NewDividendRepository(db *gorm.DB) DividendRepositoryAdapter {
 	return DividendRepository{db: db}
-}
-
-func (r DividendRepository) FindDividends(filter schemas.DividendFilter) ([]models.Dividend, error) {
-	var Dividends []models.Dividend
-
-	query := r.db.Model(&models.Dividend{})
-
-	if filter.Name != "" {
-		query = query.Where("name LIKE ?", filter.Name)
-	}
-	if filter.Code != "" {
-		query = query.Where("code LIKE ?", filter.Code)
-	}
-
-	result := query.Find(&Dividends)
-	if result.Error != nil {
-		log.Error("Error while querying Dividends:", result.Error)
-
-		return nil, result.Error
-	}
-
-	return Dividends, nil
 }
 
 func (r DividendRepository) FindDividendByID(id int64) (*models.Dividend, error) {

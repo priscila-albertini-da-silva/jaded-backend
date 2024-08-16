@@ -1,12 +1,16 @@
 package models
 
 import (
-	"gorm.io/gorm"
+	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Stock struct {
-	gorm.Model
-	Name     string
-	Code     string
-	Quantity int64
+	ID            uint
+	Name          string
+	Ticker        string
+	Sector        string
+	PurchasePrice decimal.Decimal
+	CreatedAt     time.Time
 }
